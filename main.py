@@ -1,5 +1,6 @@
 from jinja2 import Environment, FileSystemLoader, meta
 import sys, string, random, requests, gzip
+from subprocess import call
 
 values_used = {}
 def main():
@@ -16,18 +17,26 @@ def mine_salt(char):
     salt = [random.choice(chars) for x in range(char)]
     return ''.join(salt)
 
-def tar_get(url):
-    r = requests.get(url)
-    tar_file = open(stringIO(r.content))
+def tar_get(param_list):
+    """This method will be responsible for downloading and extracting packages/default platform installs"""
+    try:
+        call(['curl', param_list[1]])
+    except:
+        try:
+            call(['wget', param_list[1]])
+        except:
+            raise
+
 
 def fill_template(param_list):
+    """Here we setup the core template engine, we will need to declare any filters we add inside this module, see the 'mine_salt' example below."""
     env = Environment(loader=FileSystemLoader(('nginx-templates/', 'mysql-templates/', 'temp/', 'misc-templates/')))
     env.filters['mine_salt'] = mine_salt
     try:
         template_source = env.loader.get_source(env, param_list[1])[0]
     except:
         raise NameError('Template Name invalid, please check recipe')
-    template = env.get_template(template_name)
+    template = env.get_template(param_list[1])
     parsed_content = env.parse(template_source)
     tags = meta.find_undeclared_variables(parsed_content)
     tags_input = {}
