@@ -1,4 +1,4 @@
-template wordpress.sql
-template wordpress-http.cfg
+fill_template wordpress.sql
+fill_template wordpress-http.cfg
 tarextract http://wordpress.org/latest.tar.gz
 template wp-config.cfg wp-config.php
